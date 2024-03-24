@@ -17,27 +17,56 @@ public class Board {
         }
     }
 
-    public void play(Position position, Tile.Side side) {
-        getTile(position).setWallState(side, true);
-
+    public void play(Position position, Tile.Side side, int player) {
+        Tile tile = getTile(position);
+        Tile adjacentTile = null;
         int rowSize = tiles.get(0).size();
+
+        tile.setWallState(side, true);
 
         if(side == Tile.Side.LEFT && position.col - 1 >= 0) {
             Position adjacentPosition = new Position(position.col - 1, position.row);
-            getTile(adjacentPosition).setWallState(Tile.Side.RIGHT, true);
+            adjacentTile = getTile(adjacentPosition);
+            adjacentTile.setWallState(Tile.Side.RIGHT, true);
         }
         else if(side == Tile.Side.RIGHT && position.col + 1 < rowSize) {
             Position adjacentPosition = new Position(position.col + 1, position.row);
-            getTile(adjacentPosition).setWallState(Tile.Side.LEFT, true);
+            adjacentTile = getTile(adjacentPosition);
+            adjacentTile.setWallState(Tile.Side.LEFT, true);
         }
         else if(side == Tile.Side.TOP && position.row - 1 >= 0) {
             Position adjacentPosition = new Position(position.col, position.row - 1);
-            getTile(adjacentPosition).setWallState(Tile.Side.BOTTOM, true);
+            adjacentTile = getTile(adjacentPosition);
+            adjacentTile.setWallState(Tile.Side.BOTTOM, true);
         }
         else if(side == Tile.Side.BOTTOM && position.row + 1 < tiles.size()) {
             Position adjacentPosition = new Position(position.col, position.row + 1);
-            getTile(adjacentPosition).setWallState(Tile.Side.TOP, true);
+            adjacentTile = getTile(adjacentPosition);
+            adjacentTile.setWallState(Tile.Side.TOP, true);
         }
+
+        // claim tiles if necessary
+        tryToClaimTile(tile, player);
+        tryToClaimTile(adjacentTile, player);
+    }
+
+    private boolean tryToClaimTile(Tile tile, int player) {
+        if(tile == null) {
+            return false;
+        }
+
+        boolean tileClaimed = false;
+
+        if(tile.getWallState(Tile.Side.TOP) && tile.getWallState(Tile.Side.BOTTOM)) {
+            if(tile.getWallState(Tile.Side.LEFT) && tile.getWallState(Tile.Side.RIGHT)) {
+                if(tile.getOwner() == 0) {
+                    tile.setOwner(player);
+                    tileClaimed = true;
+                }
+            }
+        }
+
+        return tileClaimed;
     }
 
     public boolean isValidPosition(Position position) {

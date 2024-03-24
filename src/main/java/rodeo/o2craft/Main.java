@@ -17,17 +17,19 @@ public class Main {
         Board board = new Board(8, 5);
         ConsoleBoardPrinter boardPrinter = new ConsoleBoardPrinter(board);
 
+        int currentPlayer = 1;
+
         boolean gameOver = false;
         while(!gameOver) {
             output.printLine(boardPrinter);
 
-            output.print("\nSelect a tile> ");
+            output.print("\nPlayer " + currentPlayer + " Select a tile> ");
             String inputString = input.getInput();
             Board.Position position = inputParser.parsePosition(inputString);
 
             while(!board.isValidPosition(position)) {
                 output.printLine("Position invalid. Try again.");
-                output.print("\nSelect a tile> ");
+                output.print("Player " + currentPlayer + " Select a tile> ");
                 inputString = input.getInput();
                 position = inputParser.parsePosition(inputString);
             }
@@ -44,7 +46,8 @@ public class Main {
                 side = inputParser.parseSide(inputString);
             }
 
-            board.play(position, side);
+            board.play(position, side, currentPlayer);
+            currentPlayer = (currentPlayer == 1) ? 2 : 1;
         }
     }
 }
