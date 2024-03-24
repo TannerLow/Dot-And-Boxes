@@ -1,10 +1,13 @@
 package rodeo.o2craft.GameElements.Objects;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Board {
     private List<List<Tile>> tiles;
+    private Map<Integer,Integer> points;
 
     public Board(int width, int height) {
         tiles = new ArrayList<>();
@@ -15,9 +18,11 @@ public class Board {
                 tiles.get(row).add(tile);
             }
         }
+
+        points = new HashMap<>();
     }
 
-    public void play(Position position, Tile.Side side, int player) {
+    public boolean play(Position position, Tile.Side side, int player) {
         Tile tile = getTile(position);
         Tile adjacentTile = null;
         int rowSize = tiles.get(0).size();
@@ -46,8 +51,11 @@ public class Board {
         }
 
         // claim tiles if necessary
-        tryToClaimTile(tile, player);
-        tryToClaimTile(adjacentTile, player);
+        boolean tileClaimed = false;
+        tileClaimed = tryToClaimTile(tile, player) || tileClaimed;
+        tileClaimed = tryToClaimTile(adjacentTile, player) || tileClaimed;
+
+        return tileClaimed;
     }
 
     private boolean tryToClaimTile(Tile tile, int player) {
@@ -61,12 +69,30 @@ public class Board {
             if(tile.getWallState(Tile.Side.LEFT) && tile.getWallState(Tile.Side.RIGHT)) {
                 if(tile.getOwner() == 0) {
                     tile.setOwner(player);
+                    points.putIfAbsent(player, 0);
+                    points.merge(player, 1, Integer::sum);
                     tileClaimed = true;
                 }
             }
         }
 
         return tileClaimed;
+    }
+
+    public boolean isComplete() {
+        for(List<Tile> row : tiles) {
+            for(Tile tile : row) {
+                if(tile.getOwner() == 0) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    public int getCount(int player) {
+        return points.getOrDefault(player, 0);
     }
 
     public boolean isValidPosition(Position position) {

@@ -14,7 +14,7 @@ public class Main {
         TextInput input = new ConsoleInput();
         TextOutput output = new ConsoleOutput();
         ConsoleInputParser inputParser = new ConsoleInputParser();
-        Board board = new Board(8, 5);
+        Board board = new Board(3, 2);
         ConsoleBoardPrinter boardPrinter = new ConsoleBoardPrinter(board);
 
         int currentPlayer = 1;
@@ -46,8 +46,19 @@ public class Main {
                 side = inputParser.parseSide(inputString);
             }
 
-            board.play(position, side, currentPlayer);
-            currentPlayer = (currentPlayer == 1) ? 2 : 1;
+            if(!board.play(position, side, currentPlayer)) {
+                currentPlayer = (currentPlayer == 1) ? 2 : 1;
+            }
+
+            if(board.isComplete()) {
+                int player1Score = board.getCount(1);
+                int player2Score = board.getCount(2);
+                output.printLine("Player 1 score: " + player1Score);
+                output.printLine("Player 2 score: " + player2Score);
+                gameOver = true;
+            }
         }
+
+        output.printLine(boardPrinter);
     }
 }
